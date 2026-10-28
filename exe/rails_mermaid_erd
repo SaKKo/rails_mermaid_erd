@@ -1,0 +1,52 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "optparse"
+require_relative "../lib/rails_mermaid_erd"
+
+options = { exclude: [], model_paths: nil, fk_mode: :non_conventional }
+output = "erd.mmd"
+quiet = false
+
+parser = OptionParser.new do |o|
+  o.banner = "Usage: rails_mermaid_erd [RAILS_ROOT] [options]"
+  o.on("-o", "--output FILE", "Output file (default: erd.mmd, '-' for stdout)") { |v| output = v }
+  o.on("-m", "--models PATH", "Model dir or file to scan; repeatable (default: app/models)") do |v|
+    (options[:model_paths] ||= []) << v
+  end
+  o.on("-s", "--schema FILE", "schema.rb used to type foreign keys (default: db/schema.rb)") do |v|
+    options[:schema_path] = v
+  end
+  o.on("-x", "--exclude A,B", Array, "Models to leave out") { |v| options[:exclude].concat(v) }
+  o.on("-p", "--polymorphic SPEC",
+       "Polymorphic targets, repeatable: updated_by=User,Admin or Notification.created_by=User") do |v|
+    (options[:polymorphic] ||= {}).merge!(RailsMermaidErd.parse_polymorphic(v))
+  end
+  o.on("-c", "--config FILE", "YAML config (default: config/rails_mermaid_erd.yml)") do |v|
+    options[:config_path] = v
+  end
+  o.on("--fk-mode MODE", %w[non-conventional explicit],
+       "Show FKs that are non-conventional (default) or only explicit `foreign_key:`") do |v|
+    options[:fk_mode] = v == "explicit" ? :explicit : :non_conventional
+  end
+  o.on("-q", "--quiet", "Don't print warnings") { quiet = true }
+  o.on("-v", "--version") { puts RailsMermaidErd::VERSION; exit }
+  o.on("-h", "--help") { puts o; exit }
+end
+parser.parse!(ARGV)
+
+root = File.expand_path(ARGV.first || Dir.pwd)
+options[:model_paths]&.map! { |p| File.expand_path(p) }
+options[:schema_path] &&= File.expand_path(options[:schema_path])
+options[:config_path] &&= File.expand_path(options[:config_path])
+abort "Config file not found: #{options[:config_path]}" if options[:config_path] && !File.exist?(options[:config_path])
+
+result = RailsMermaidErd.generate(root: root, **options)
+result.warnings.each { |w| warn "warning: #{w}" } unless quiet
+
+if output == "-"
+  print result.mermaid
+else
+  File.write(output, result.mermaid)
+  warn "Wrote #{output} (#{result.models} models, #{result.relationships} relationships)" unless quiet
+end

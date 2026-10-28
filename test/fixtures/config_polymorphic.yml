@@ -1,0 +1,3 @@
+polymorphic:
+  updated_by: [User, AdminUser]        # any model's belongs_to :updated_by
+  Notification.created_by: [User]
