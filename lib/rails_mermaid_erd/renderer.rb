@@ -1,3 +1,4 @@
+Resolving dependencies...
 # frozen_string_literal: true
 
 module RailsMermaidErd
@@ -30,7 +31,7 @@ module RailsMermaidErd
             parts = [type, column]
             parts << key if key
             parts << quote(comment) if comment
-            lines << "#{@indent * 2}#{parts.join(' ')}"
+            lines << "#{@indent * 2}#{parts.join(" ")}"
           end
           lines << "#{@indent}}"
         elsif !connected.include?(name)

@@ -1,3 +1,4 @@
+Resolving dependencies...
 # frozen_string_literal: true
 
 require "set"
@@ -57,7 +58,7 @@ module RailsMermaidErd
     # polymorphic_lookup - optional callable(model_name, assoc_name, foreign_key) returning
     #                      target class names (the rake task uses it to read *_type from the DB)
     def initialize(parser, schema: Schema.new({}), exclude: [], fk_mode: :non_conventional,
-                   polymorphic: {}, polymorphic_lookup: nil)
+                           polymorphic: {}, polymorphic_lookup: nil)
       @classes = parser.classes
       @concerns = parser.concerns
       @schema = schema
@@ -244,10 +245,10 @@ module RailsMermaidErd
         next if e.kind == :habtm
 
         show = if @fk_mode == :explicit
-                 e.explicit_fk || e.polymorphic_as
-               else
-                 e.polymorphic_as || e.foreign_keys.map(&:to_s) != [Inflector.foreign_key(e.parent)]
-               end
+            e.explicit_fk || e.polymorphic_as
+          else
+            e.polymorphic_as || e.foreign_keys.map(&:to_s) != [Inflector.foreign_key(e.parent)]
+          end
 
         if show
           e.foreign_keys.each do |fk|

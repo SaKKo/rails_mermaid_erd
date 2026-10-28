@@ -1,3 +1,4 @@
+Resolving dependencies...
 # frozen_string_literal: true
 
 module RailsMermaidErd
@@ -15,7 +16,7 @@ module RailsMermaidErd
 
     IRREGULAR = {
       "person" => "people", "man" => "men", "woman" => "women", "child" => "children",
-      "sex" => "sexes", "move" => "moves", "zombie" => "zombies", "ox" => "oxen"
+      "sex" => "sexes", "move" => "moves", "zombie" => "zombies", "ox" => "oxen",
     }.freeze
     UNCOUNTABLE = %w[equipment information rice money species series fish sheep jeans police].freeze
 
